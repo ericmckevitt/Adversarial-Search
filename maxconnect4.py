@@ -65,6 +65,17 @@ def print_board(board: list[list[str]]) -> None:
 def window_has_point(window) -> bool:
     return all([item == window[0] for item in window])
         
+def game_is_over(board) -> bool:
+    '''
+    Return true if game is over
+    '''
+    # if any value is zero, return False
+    for row in board:
+        for val in row:
+            if val == "0":
+                return False
+    return True
+    
 def score_board(board: list[list[str]]):
     '''
     Computes the score each player has. 
@@ -268,6 +279,8 @@ def main():
     print_board(board)
     
     score_board(board)
+    
+    print(game_is_over(board))
 
 if __name__ == '__main__':
     main()
