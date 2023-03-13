@@ -62,6 +62,9 @@ def print_board(board: list[list[str]]) -> None:
                 print("🟢", end="") 
         print()
         
+def window_has_point(window) -> bool:
+    return all([item == window[0] for item in window])
+        
 def score_board(board: list[list[str]]):
     '''
     Computes the score each player has. 
@@ -83,7 +86,7 @@ def score_board(board: list[list[str]]):
             window = row[l:u+1]
             # print(window)
             
-            if all([item == window[0] for item in window]):
+            if window_has_point(window):
                 if window[0] == "1":
                     p1_points += 1
                 elif window[0] == "2":
@@ -108,7 +111,7 @@ def score_board(board: list[list[str]]):
             window = row[l:u+1]
             # print(window)
             
-            if all([item == window[0] for item in window]):
+            if window_has_point(window):
                 if window[0] == "1":
                     p1_points += 1
                 elif window[0] == "2":
@@ -119,11 +122,79 @@ def score_board(board: list[list[str]]):
             u += 1
             
     '''
-    DIAGONAL POINTS
+    UPPER DIAGONAL POINTS FOR TOP HALF
+    '''
+    for i in range(len(board)):
+        print(f"i = {i}")
+        
+        x_values = [i - j for j in range(i+1)]
+        y_values = [j for j in range(i+1)]
+            
+        diagonal_row = []
+        for j in range(len(x_values)):
+            diagonal_row.append(board[x_values[j]][y_values[j]])
+            
+        print(f"diagonal_row: {diagonal_row}")
+        
+        # Slide window across diagonal row and add points
+        if len(diagonal_row) >= 4:
+            l = 0
+            u = 3
+            
+            while u < len(diagonal_row):
+                window = diagonal_row[l:u+1]
+                
+                if window_has_point(window):
+                    if window[0] == "1":
+                        p1_points += 1
+                    elif window[0] == "2":
+                        p2_points += 1
+                
+                # Move the window
+                l += 1
+                u += 1
+                
+    '''
+    UPPER DIAGONAL FOR BOTTOM HALF
     '''
     
+    print("\n\n\n")
+    # Start at 1st index for columns, last row
+    for i in range(1, len(board[0])):
+        y_values = list(reversed([j for j in range(len(board))]))
+        x_values = list(range(i, len(board[0])))
+        
+        diagonal_row = []
+        for j in range(len(x_values)):
+            print(f"\t{y_values[j]}, {x_values[j]}")
+            diagonal_row.append(board[y_values[j]][x_values[j]])
+        
+        if len(diagonal_row) >= 4:
+            l = 0
+            u = 3
+            
+            while u < len(diagonal_row):
+                window = diagonal_row[l:u+1]
+                
+                if window_has_point(window):
+                    if window[0] == "1":
+                        p1_points += 1
+                    elif window[0] == "2":
+                        p2_points += 1
+                
+                # Move the window
+                l += 1
+                u += 1
+        
     
-    print(f"({p1_points}-{p2_points})")
+    
+        
+    
+    
+    print(f"\nScore: ({p1_points}-{p2_points})", end="")
+    if p1_points > p2_points: print(" :: Red is winning! ")
+    elif p1_points == p2_points: print(" :: Tied!")
+    else: print(" :: Green is winning! ")
 
 def main():
     # Clear the terminal
@@ -139,8 +210,8 @@ def main():
     
     board, next_player = read_board_from_file(input_file)
     
-    print(board)
-    print(next_player, end="\n\n")
+    # print(board)
+    # print(next_player, end="\n\n")
     
     print_board(board)
     
