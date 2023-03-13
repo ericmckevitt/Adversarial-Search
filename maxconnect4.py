@@ -69,6 +69,10 @@ def score_board(board: list[list[str]]):
     
     p1_points, p2_points = 0, 0
     
+    '''
+    HORIZONTAL POINTS
+    '''
+    
     # Use a sliding window of 4 approach to count horizontal points
     for row in board:
         
@@ -88,6 +92,36 @@ def score_board(board: list[list[str]]):
             # Move the window
             l += 1
             u += 1
+            
+    '''
+    VERTICAL POINTS
+    '''
+    
+    transposed_board = list(map(list, zip(*board)))
+    # print_board(transposed_board)
+    for row in transposed_board:
+        
+        l = 0
+        u = 3
+        
+        while u < len(row):
+            window = row[l:u+1]
+            # print(window)
+            
+            if all([item == window[0] for item in window]):
+                if window[0] == "1":
+                    p1_points += 1
+                elif window[0] == "2":
+                    p2_points += 1
+            
+            # Move the window
+            l += 1
+            u += 1
+            
+    '''
+    DIAGONAL POINTS
+    '''
+    
     
     print(f"({p1_points}-{p2_points})")
 
