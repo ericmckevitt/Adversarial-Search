@@ -101,7 +101,7 @@ def score_board(board: list[list[str]]):
     '''
     
     transposed_board = list(map(list, zip(*board)))
-    # print_board(transposed_board)
+    
     for row in transposed_board:
         
         l = 0
@@ -125,16 +125,12 @@ def score_board(board: list[list[str]]):
     UPPER DIAGONAL POINTS FOR TOP HALF
     '''
     for i in range(len(board)):
-        print(f"i = {i}")
-        
         x_values = [i - j for j in range(i+1)]
         y_values = [j for j in range(i+1)]
             
         diagonal_row = []
         for j in range(len(x_values)):
             diagonal_row.append(board[x_values[j]][y_values[j]])
-            
-        print(f"diagonal_row: {diagonal_row}")
         
         # Slide window across diagonal row and add points
         if len(diagonal_row) >= 4:
@@ -166,8 +162,41 @@ def score_board(board: list[list[str]]):
         
         diagonal_row = []
         for j in range(len(x_values)):
-            print(f"\t{y_values[j]}, {x_values[j]}")
             diagonal_row.append(board[y_values[j]][x_values[j]])
+        
+        if len(diagonal_row) >= 4:
+            l = 0
+            u = 3
+            
+            while u < len(diagonal_row):
+                window = diagonal_row[l:u+1]
+                
+                if window_has_point(window):
+                    if window[0] == "1":
+                        p1_points += 1
+                    elif window[0] == "2":
+                        p2_points += 1
+                
+                # Move the window
+                l += 1
+                u += 1
+    
+    '''
+    DOWNWARD DIAGONAL BOTTOM CHECK
+    '''
+    
+    for i in range(len(board)): # [0, 5]
+        
+        y_values = [j for j in range(i, len(board))]
+        x_values = [j for j in range(len(y_values))]
+        
+        # print(f"i: {i}, y_vals: {y_values}, x_vals: {x_values}")
+        
+        diagonal_row = []
+        for j in range(len(x_values)):
+            diagonal_row.append(board[y_values[j]][x_values[j]])
+            
+        print(f"\ti: {i}, diagonal_row: {diagonal_row}")
         
         if len(diagonal_row) >= 4:
             l = 0
@@ -187,8 +216,6 @@ def score_board(board: list[list[str]]):
                 u += 1
         
     
-    
-        
     
     
     print(f"\nScore: ({p1_points}-{p2_points})", end="")
