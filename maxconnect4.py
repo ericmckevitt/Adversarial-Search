@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 
 ####################################################################
 #   Interactive mode test command:                                 #
@@ -32,20 +33,26 @@ def command_line_inputs() -> list:
 def read_board_from_file(filename: str = "input2.txt"):
     board = []
     next_player = None
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        
-        for line in lines:
-            line = line.strip()
-            if len(line) == 7:
-                # print(f"row: {line}")
-                row = []
-                for c in line:
-                    row.append(c)
-                board.append(row)
-            elif len(line) == 1:
-                # print(f"next turn: {line}")
-                next_player = int(line)
+    try:
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+            
+            for line in lines:
+                line = line.strip()
+                if len(line) == 7:
+                    # print(f"row: {line}")
+                    row = []
+                    for c in line:
+                        row.append(c)
+                    board.append(row)
+                elif len(line) == 1:
+                    # print(f"next turn: {line}")
+                    next_player = int(line)
+    except FileNotFoundError:
+        # Generate empty board
+        print("Starting new game...")
+        board = [["0" for _ in range(7)] for _ in range(6)]
+        next_player = random.choice(["computer-next","human-next"])
                 
     return board, next_player
             
@@ -60,7 +67,7 @@ def print_board(board: list[list[str]]) -> None:
                 print("🔴", end="")
             elif item == "2":
                 print("🟢", end="") 
-        print()
+        print() if i != len(board) - 1 else None
         
 def window_has_point(window) -> bool:
     return all([item == window[0] for item in window])
@@ -252,11 +259,6 @@ def score_board(board: list[list[str]]):
                 l += 1
                 u += 1
     
-    # print(f"Score: ({p1_points}-{p2_points})", end="")
-    # if p1_points > p2_points: print(" :: Red is winning! ")
-    # elif p1_points == p2_points: print(" :: Tied!")
-    # else: print(" :: Green is winning! ")
-    
     return p1_points, p2_points
 
 def fix_board(board: list[list[str]]) -> list[list[str]]:
@@ -317,28 +319,44 @@ def has_empty_cell_below(board) -> bool:
     # If no non-zero cell has an empty cell below it, return False
     return False
 
+def print_score(p1_score, p2_score) -> None:
+    print(f"{p1_score} - {p2_score}")
+    # if p1_score > p2_score: print("")
+
+def interactive():
+    pass
+
 def main():
     # Clear the terminal
     os.system('cls' if os.name == 'nt' else 'clear')
     
+    # Collect argument data 
     mode, input_file, next_player, depth = command_line_inputs()
     output_file = next_player if mode == "one-move" else ""
     
-    print(f"mode: \t\t{mode}")
+    # Output argument data
+    print(f"\nmode: \t\t{mode}")
     print(f"input_file: \t{input_file}")
-    print(f"output_file: \t{output_file}") if mode == "one-move" else print(f"next_player: {next_player}")
+    print(f"output_file: \t{output_file}") if mode == "one-move" else print(f"next_player: \t{next_player}")
     print(f"depth: \t\t{depth}\n")
     
+    # Read in file
     board, next_player = read_board_from_file(input_file)
     
-    print_board(board)
-    
+    # Fix board
     while has_empty_cell_below(board):
         board = fix_board(board)
         
     print_board(board)
     
     p1_points, p2_points = score_board(board)
+    
+    print_score(p1_points, p2_points)
+    
+    if mode == "interactive":
+        interactive()
+    elif mode == "one-move":
+        pass
     
 
 if __name__ == '__main__':
