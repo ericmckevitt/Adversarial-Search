@@ -50,7 +50,7 @@ def read_board_from_file(filename: str = "input2.txt"):
     return board, next_player
             
 def print_board(board: list[list[str]]) -> None:
-    print("  " + " ".join([str(i+1) for i in range(len(board[0]))]))
+    print("\n  " + " ".join([str(i+1) for i in range(len(board[0]))]))
     for i, row in enumerate(board):
         print(f"{len(board) - i} ", end="")
         for item in row:
@@ -251,13 +251,71 @@ def score_board(board: list[list[str]]):
                 # Move the window
                 l += 1
                 u += 1
+    
+    # print(f"Score: ({p1_points}-{p2_points})", end="")
+    # if p1_points > p2_points: print(" :: Red is winning! ")
+    # elif p1_points == p2_points: print(" :: Tied!")
+    # else: print(" :: Green is winning! ")
+    
+    return p1_points, p2_points
+
+def fix_board(board: list[list[str]]) -> list[list[str]]:
+    """
+    Moves pieces down 1 spot if possible.
+    """
+
+    # Make a copy of the input board
+    new_board = [row[:] for row in board]
+
+    # Iterate over the columns of the board
+    for col_index in range(len(board[0])):
+        # Extract the current column as a list
+        column = [board[row_index][col_index] for row_index in range(len(board))]
         
+        # Move non-zero pieces down as far as possible
+        for row_index in range(len(column) - 1, -1, -1):
+            if column[row_index] != '0':
+                for shift_index in range(row_index+1, len(column)):
+                    if column[shift_index] == '0':
+                        # Swap the pieces
+                        column[row_index], column[shift_index] = column[shift_index], column[row_index]
+
+        # Update the new board with the modified column
+        for row_index in range(len(column)):
+            new_board[row_index][col_index] = column[row_index]
+    
+    # Return the modified copy of the board
+    return new_board
+
+def has_empty_cell_below(board) -> bool:
+    """
+    Check if there is any non-zero cell in the given column that has an empty cell below it.
+
+    Returns:
+    True if there is any non-zero cell in the column that has an empty cell below it, False otherwise.
+    """
     
     
-    print(f"\nScore: ({p1_points}-{p2_points})", end="")
-    if p1_points > p2_points: print(" :: Red is winning! ")
-    elif p1_points == p2_points: print(" :: Tied!")
-    else: print(" :: Green is winning! ")
+    # Iterate over the columns
+    for i in range(len(board[0])):
+        
+        # Get column i
+        column = [board[j][i] for j in range(len(board))]
+        # print(f"column: {column}")
+        
+        # Find first nonzero number. If zero after that, then return True. Otherwise False
+        found_nonzero = False
+        for value in column:
+            # If we find nonzero value, save its index
+            if value != "0" and not found_nonzero:
+                found_nonzero = True
+                continue
+            
+            if value == "0" and found_nonzero:
+                return True
+        
+    # If no non-zero cell has an empty cell below it, return False
+    return False
 
 def main():
     # Clear the terminal
@@ -273,14 +331,15 @@ def main():
     
     board, next_player = read_board_from_file(input_file)
     
-    # print(board)
-    # print(next_player, end="\n\n")
-    
     print_board(board)
     
-    score_board(board)
+    while has_empty_cell_below(board):
+        board = fix_board(board)
+        
+    print_board(board)
     
-    print(game_is_over(board))
+    p1_points, p2_points = score_board(board)
+    
 
 if __name__ == '__main__':
     main()
