@@ -4,7 +4,7 @@ import random
 
 ####################################################################
 #   Interactive mode test command:                                 #
-#   python maxconnect4.py interactive input2.txt output2.txt 7     #
+#   python maxconnect4.py interactive input8.txt human-next 7     #
 #                                                                  #
 #   One-Move mode test command:                                    #
 #   python maxconnect4.py one-move input2.txt output2.txt 7        #
@@ -55,6 +55,22 @@ def read_board_from_file(filename: str = "input2.txt"):
         next_player = random.choice(["computer-next","human-next"])
                 
     return board, next_player
+
+def write_board_to_file(board: list[list[str]], turn: str = "human-next", filename: str = "output.txt"):
+    with open(filename, 'w') as f:
+        line = ""
+        
+        for row in board:
+            for c in row:
+                line += c
+            f.write(line + "\n")
+            line = ""
+            
+        if turn == "human-next":
+            f.write("1\n")
+        else: 
+            f.write("2\n")
+        
             
 def print_board(board: list[list[str]]) -> None:
     print("\n  " + " ".join([str(i+1) for i in range(len(board[0]))]))
@@ -319,12 +335,75 @@ def has_empty_cell_below(board) -> bool:
     # If no non-zero cell has an empty cell below it, return False
     return False
 
-def print_score(p1_score, p2_score) -> None:
-    print(f"{p1_score} - {p2_score}")
-    # if p1_score > p2_score: print("")
-
-def interactive():
+def minimax(board, depth):
+    '''
+    Input: current board state
+    Output: optimal next move given the depth limit 
+    
+    num_valid_moves = num_cols - num_full_cols (check board[0])
+    '''
+    # TODO: Implement (watch seb lague video)
     pass
+    
+def play_move(board: list[list[str]], col: int, curr_player: int) -> list[list[str]]:
+    '''
+    Input: Current board, column to play move, and the current player
+    Output: Updated board after playing that move.
+    '''
+    
+    # Account for 1-indexed display function
+    col -= 1
+    
+    # Place piece at top
+    if curr_player == "human-next":
+        board[0][col] = "1"
+    else:
+        board[0][col] = "2"
+    
+    # Fix the board
+    while has_empty_cell_below(board):
+        board = fix_board(board)
+        
+    # Return fixed board
+    return board
+
+def print_score(p1_score, p2_score, game_over = False) -> None:
+    if game_over:
+        if p1_score > p2_score: print("Red wins!")
+        elif p1_score == p2_score: print("Tie game!")
+        else: print("Green wins!")
+    else:
+        print(f"{p1_score} - {p2_score}")
+        
+def static_evalulation(board) -> int:
+    '''
+    Evaluates a board state as single integer. 
+    '''
+    p1_points, p2_points = score_board(board)
+    return p1_points - p2_points
+
+def toggle_turn(curr_player: str) -> str:
+    return "computer-next" if curr_player == "human-next" else "human-next"
+
+
+
+def interactive(board, next_turn, depth):
+    if next_turn == "computer-next":
+        # Print current board and score
+        print_board(board)
+        p1_score, p2_score = score_board(board)
+        print_score(p1_score, p2_score)
+        
+        # If terminal, exit
+        if game_is_over(board):
+            p1_score, p2_score = score_board(board)
+            print_score(p1_score, p2_score, game_over=True)
+        else:
+            # TODO: use minimax to compute next move
+            pass
+    else:
+        # TODO: Implement human move here
+        pass
 
 def main():
     # Clear the terminal
@@ -341,7 +420,7 @@ def main():
     print(f"depth: \t\t{depth}\n")
     
     # Read in file
-    board, next_player = read_board_from_file(input_file)
+    board, _ = read_board_from_file(input_file)
     
     # Fix board
     while has_empty_cell_below(board):
@@ -349,14 +428,26 @@ def main():
         
     print_board(board)
     
+    board = play_move(board, 5, next_player)
+    print_board(board)
+    
     p1_points, p2_points = score_board(board)
+    # print_score(p1_points, p2_points)
     
-    print_score(p1_points, p2_points)
+    # print(static_evalulation(board))
     
-    if mode == "interactive":
-        interactive()
-    elif mode == "one-move":
-        pass
+    next_player = toggle_turn(next_player)
+    
+    write_board_to_file(board, next_player, "output_test.txt")
+    
+    
+    
+    
+    
+    # if mode == "interactive":
+    #     interactive(board, next_player, depth)
+    # elif mode == "one-move":
+    #     pass
     
 
 if __name__ == '__main__':
